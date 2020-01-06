@@ -1,10 +1,10 @@
-import App from './App.svelte';
+import Bieren from './Bieren.svelte';
 
-const app = new App({
+const bieren = new Bieren({
 	target: document.body,
 	props: {
-		name: 'world'
+
 	}
 });
 
-export default app;
+export default bieren;
