@@ -2,11 +2,21 @@
 	import { onMount } from 'svelte';
 
 	let bieren = [];
-	let page = '1';
-	let pages = [1,2,3,4,5,6,7,8,9,10,11,12]
+
+	
+	const pages = [
+		...new Array(23).fill(1).map((x, i) => i)
+	]
+	
+	async function gotoPage (page) {
+		console.log(`go to page ${page}`)
+		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beers?p=${page}&key=395c2bade2ee114e421a9228d3cbc512`);
+		const json = await res.json();
+		bieren = json.data;
+	}
 
 	onMount(async () => {
-		const res = await fetch('https://sandbox-api.brewerydb.com/v2/beers?p='+ page +'&key=395c2bade2ee114e421a9228d3cbc512');
+		const res = await fetch('https://sandbox-api.brewerydb.com/v2/beers?p=1&key=395c2bade2ee114e421a9228d3cbc512');
 		const json = await res.json();
 		bieren = json.data;
 		console.log(bieren)
@@ -19,6 +29,18 @@
 			<p>{bier.name}</p>
 		{/each}
 	</div>
+
+	<button on:click={() => gotoPage(0)}>
+		&lt;
+	</button>
+	{#each pages as page}
+		<button on:click={() => gotoPage(page)}>
+			{page}
+		</button>
+	{/each}
+	<button on:click={() => gotoPage(pages.length)}>
+		&gt;
+	</button>
 </main>
 
 <style>
