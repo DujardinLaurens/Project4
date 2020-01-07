@@ -1,10 +1,7 @@
-import Bieren from './Bieren.svelte';
+import App from './App.svelte';
 
-const bieren = new Bieren({
-	target: document.body,
-	props: {
-
-	}
+const app = new App({
+	target: document.body
 });
 
-export default bieren;
+export default app;
