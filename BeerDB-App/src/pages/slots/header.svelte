@@ -1,19 +1,19 @@
 <slot>
-    <div class="header">
+    <div id="header">
         <div class="logo">
             <p>logo</p>
         </div>
         <div class="menu">
             <ul class="menu__list">
-                <li class="menu__list-item"><a href="/bieren">Bieren</a></li>
-                <li class="menu__list-item"><a href="/brouwerijen">Brouwerijen</a></li>
+                <li class="menu__list-item"><a href="/beers">Bieren</a></li>
+                <li class="menu__list-item"><a href="/breweries">Brouwerijen</a></li>
             </ul>
         </div>
     </div>
 </slot>
 
 <style>
-	.header {
+	#header {
         display: flex;
         justify-content: space-between;
         align-items: center;

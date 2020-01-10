@@ -2,42 +2,46 @@
 	import { onMount } from 'svelte';
 	import Header from './slots/header.svelte';
 
-	let bieren = [];
+	let beers = [];
 	
 	const pages = [
 		...new Array(24).fill().map((x, i) => i).slice(1)
 	]
+
+	let beerId = []
 	
 	async function gotoPage (page) {
 		console.log(`go to page ${page}`)
 		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beers?p=${page}&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
-		bieren = json.data;
-	}
+		beers = json.data;
+	};
+
 	onMount(async () => {
-		const res = await fetch('https://sandbox-api.brewerydb.com/v2/beers?p=1&key=395c2bade2ee114e421a9228d3cbc512');
+		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beers?p=1&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
-		bieren = json.data;
-		console.log(bieren)
+		beers = json.data;
+		console.log(beers);
 	});
 </script>
 
 <main>
 	<Header></Header>
 	<div class="gallery">
-		{#each bieren as bier}
-		<div class="gallery_bieren">
-			{#if bier.labels == undefined}
-				<div class="bier_foto">
+		{#each beers as beer}
+		<div class="beer_gallery">
+			{#if beer.labels == undefined}
+				<div class="beer_photo">
 					<img src="beer.png" alt="image"/>
 				</div>
 			{:else}
-				<div class="bier_foto">
-					<img src="{bier.labels.medium}" alt="image" />
+				<div class="beer_photo">
+					<img src="{beer.labels.medium}" alt="image" />
 				</div>
 			{/if}
-			<div class="bier_naam">
-				<p>{bier.name}</p>
+			<div class="beer_name">
+				<p>{beer.name}</p>
+				<p>{beer.id}</p>
 			</div>
 		</div>
 		{/each}
@@ -73,7 +77,7 @@
 		max-width: 100%;
 		margin: 0 auto;
 	}
-	.gallery_bieren {
+	.beer_gallery {
 		width: calc(20% - 60px);
 		display: inline-grid;
 		padding: 10px;

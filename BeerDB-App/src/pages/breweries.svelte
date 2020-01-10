@@ -2,32 +2,32 @@
 	import { onMount } from 'svelte';
 	import Header from './slots/header.svelte';
 
-	let brouwerijen = [];
+	let breweries = [];
 
 	onMount(async () => {
 		const res = await fetch('https://sandbox-api.brewerydb.com/v2/breweries/?key=395c2bade2ee114e421a9228d3cbc512');
 		const json = await res.json();
-		brouwerijen = json.data;
-		console.log(brouwerijen)
+		breweries = json.data;
+		console.log(breweries)
 	});
 </script>
 
 <main>
 	<Header></Header>
 	<div class="gallery">
-		{#each brouwerijen as brouwerij}
-		<div class="gallery_brouwerijen">
-			{#if brouwerij.images == undefined}
+		{#each breweries as brewery}
+		<div class="brewery_gallery">
+			{#if brewery.images == undefined}
 				<div class="no_image">
 					<img src="brewery.png" alt="image"/>
 				</div>
 			{:else}
-				<div class="brouwerijen_foto">
-					<img src="{brouwerij.images.squareMedium}" alt="image" />
+				<div class="brewery_photo">
+					<img src="{brewery.images.squareMedium}" alt="image" />
 				</div>
 			{/if}
-			<div class="brouwerij_naam">
-				<p>{brouwerij.name}</p>
+			<div class="brewery_name">
+				<p>{brewery.name}</p>
 			</div>
 		</div>
 		{/each}
@@ -52,7 +52,7 @@
 		max-width: 100%;
 		margin: 0 auto;
 	}
-	.gallery_brouwerijen {
+	.brewery_gallery {
 		width: calc(20% - 60px);
 		display: inline-grid;
 		padding: 10px;

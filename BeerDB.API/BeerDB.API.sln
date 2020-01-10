@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeerDB.API", "BeerDB.API\BeerDB.API.csproj", "{789CB341-6F62-4DA8-AF58-5CF68EABDB7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeerDB.Models", "BeerDB.Models\BeerDB.Models.csproj", "{6AEE8974-29DC-4CE6-8F89-682A4A77ED61}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{789CB341-6F62-4DA8-AF58-5CF68EABDB7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{789CB341-6F62-4DA8-AF58-5CF68EABDB7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{789CB341-6F62-4DA8-AF58-5CF68EABDB7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{789CB341-6F62-4DA8-AF58-5CF68EABDB7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AEE8974-29DC-4CE6-8F89-682A4A77ED61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AEE8974-29DC-4CE6-8F89-682A4A77ED61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AEE8974-29DC-4CE6-8F89-682A4A77ED61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AEE8974-29DC-4CE6-8F89-682A4A77ED61}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF91DB4E-9826-4765-A59E-56D34ECDCBFE}
+	EndGlobalSection
+EndGlobal

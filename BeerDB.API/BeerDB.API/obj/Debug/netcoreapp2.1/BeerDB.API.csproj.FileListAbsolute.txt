@@ -1,0 +1,17 @@
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.Models.dll
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.csprojAssemblyReference.cache
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.csproj.CoreCompileInputs.cache
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.RazorAssemblyInfo.cache
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.RazorAssemblyInfo.cs
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.AssemblyInfoInputs.cache
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.AssemblyInfo.cs
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.RazorTargetAssemblyInfo.cache
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.API.deps.json
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.API.runtimeconfig.json
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.API.runtimeconfig.dev.json
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.API.dll
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.API.pdb
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\bin\Debug\netcoreapp2.1\BeerDB.Models.pdb
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.csproj.CopyComplete
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.dll
+C:\Users\laure\OneDrive\Documenten\Project4\BeerDB.API\BeerDB.API\obj\Debug\netcoreapp2.1\BeerDB.API.pdb
