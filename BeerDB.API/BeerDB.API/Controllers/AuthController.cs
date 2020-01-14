@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BeerDB.API.Models;
 using BeerDB.API.Services;
 using BeerDB.Models;
+using BeerDB.Models.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -18,15 +19,17 @@ namespace BeerDB.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly BeerDBAPIContext _context;
+        private readonly IReactieRepo _reactieRepo;
         private readonly SignInManager<BeerDbUser> _signInManager;
         private readonly ILogger<AuthController> _logger;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly UserManager<BeerDbUser> _userManager;
         private IPasswordHasher<BeerDbUser> _hasher;
 
-        public AuthController(BeerDBAPIContext context, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, Microsoft.Extensions.Configuration.IConfiguration configuration, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher)
+        public AuthController(BeerDBAPIContext context, IReactieRepo reactieRepo, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, Microsoft.Extensions.Configuration.IConfiguration configuration, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher)
         {
             _context = context;
+            _reactieRepo = reactieRepo;
             _signInManager = signInManager;
             _logger = logger;
             _configuration = configuration;
@@ -62,22 +65,34 @@ namespace BeerDB.API.Controllers
             return BadRequest("Failed to login"); //zo weinig mogelijk (hacker) info
         }
 
-        [HttpPost("token")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GenerateJwtToken([FromBody]IdentityModel identityModel)
+        // GET: api/Auth/gebruikers
+        [HttpGet("gebruikers")]
+        public async Task<IEnumerable<BeerDbUser>> GetGebruikers()
         {
+            return await _reactieRepo.GetAllGebruikers();
+        }
+
+        // POST: api/Auth/register
+        [HttpPost("register")]
+        public async Task<IActionResult> PostGebruiker([FromBody] BeerDbUser beerDbUser)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("unvalid data");
             try
             {
-                var jwtsvc = new JWTServices<BeerDbUser>(_configuration, _logger, _userManager, _hasher);
-                var token = await jwtsvc.GenerateJwtToken(identityModel);
-                return Ok(token);
+                if (_userManager.FindByNameAsync(beerDbUser.UserName)
+                {
+                    this._logger.LogError($"Username already exists");
+                }
+                await _reactieRepo.AddGebruiker(beerDbUser);
+
+                return CreatedAtAction("GetGebruikers", new { id = beerDbUser.Id }, beerDbUser);
             }
             catch (Exception exc)
             {
-                _logger.LogError($"Exception thrown when creating JWT: {exc}");
+                this._logger.LogError($"Exception thrown when trying to register in: {exc}");
             }
-            //Bij niet succesvolle authenticatie wordt een Badrequest (=zo weinig mogelijkeinfo) teruggeven.
-            return BadRequest("Failed to generate JWT token");
+            return BadRequest("Failed to register"); //zo weinig mogelijk (hacker) info 
         }
     }
 }

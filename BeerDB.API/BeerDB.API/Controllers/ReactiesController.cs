@@ -9,6 +9,8 @@ using BeerDB.API.Models;
 using BeerDB.Models;
 using BeerDB.Models.Repositories;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace BeerDB.API.Controllers
 {
@@ -90,11 +92,14 @@ namespace BeerDB.API.Controllers
 
         // POST: api/Reacties
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> PostReactie([FromBody] Reactie reactie)
         {
             try
             {
-                reactie = await _reactieRepo.AddReactieAsync(reactie);
+                reactie.timePosted = DateTime.UtcNow;
+                reactie.gebruiker = User.Identity.Name;
+                await _reactieRepo.AddReactieAsync(reactie);
 
                 return CreatedAtAction("GetAllReacties", new { id = reactie.Id }, reactie);
             }

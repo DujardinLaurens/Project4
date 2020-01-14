@@ -21,9 +21,28 @@ namespace BeerDB.Models.Repositories
             return await _context.Reactie.OrderBy(r => r.Id).AsNoTracking().ToListAsync();
         }
 
-        public async Task<Reactie> AddReactieAsync(Reactie reactie)
+        public async Task AddReactieAsync(Reactie reactie)
         {
             await _context.Reactie.AddAsync(reactie);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"creating the reaction did not succeed");
+            }
+        }
+
+        public async Task<IEnumerable<BeerDbUser>> GetAllGebruikers()
+        {
+            return await _context.BeerDbUser.OrderBy(q => q.Id).AsNoTracking().ToListAsync();
+        }
+
+        public async Task AddGebruiker(BeerDbUser beerDbUser)
+        {
+            await _context.BeerDbUser.AddAsync(beerDbUser);
             try
             {
                 await _context.SaveChangesAsync();
@@ -31,9 +50,8 @@ namespace BeerDB.Models.Repositories
             catch (Exception)
             {
 
-                throw new Exception($"creating the reaction did not succeed");
+                throw new Exception($"creating the user {beerDbUser.UserName} did not succeed");
             }
-            return reactie;
         }
     }
 }

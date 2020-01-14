@@ -6,6 +6,8 @@ namespace BeerDB.Models.Repositories
     public interface IReactieRepo
     {
         Task<IEnumerable<Reactie>> GetAllAsync();
-        Task<Reactie> AddReactieAsync(Reactie reactie);
+        Task AddReactieAsync(Reactie reactie);
+        Task AddGebruiker(BeerDbUser beerDbUser);
+        Task<IEnumerable<BeerDbUser>> GetAllGebruikers();
     }
 }

@@ -1,6 +1,7 @@
 <script>
-	import { onMount } from 'svelte';
 	import Header from './slots/header.svelte';
+	import Loader from './slots/loader.svelte';
+	import { id } from '../store.js';
 
 	let beers = [];
 	
@@ -8,7 +9,7 @@
 		...new Array(24).fill().map((x, i) => i).slice(1)
 	]
 
-	let beerId = []
+	let promise = getBeers();
 	
 	async function gotoPage (page) {
 		console.log(`go to page ${page}`)
@@ -17,19 +18,23 @@
 		beers = json.data;
 	};
 
-	onMount(async () => {
+	async function getBeers(){
 		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beers?p=1&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
 		beers = json.data;
 		console.log(beers);
-	});
+	};
 </script>
 
 <main>
 	<Header></Header>
-	<div class="gallery">
+	{#await promise}
+	<Loader></Loader>
+	{:then}
+	<div id="myTable" class="gallery">
 		{#each beers as beer}
-		<div class="beer_gallery">
+		<a href="/beer_info"><button id="btn_none" class="btn_none" on:click={() => $id = beer.id}>
+		<div id="beer_gallery" class="beer_gallery">
 			{#if beer.labels == undefined}
 				<div class="beer_photo">
 					<img src="beer.png" alt="image"/>
@@ -39,11 +44,10 @@
 					<img src="{beer.labels.medium}" alt="image" />
 				</div>
 			{/if}
-			<div class="beer_name">
+			<div id="name" class="beer_name">
 				<p>{beer.name}</p>
-				<p>{beer.id}</p>
 			</div>
-		</div>
+		</div></button></a>
 		{/each}
 	</div>
 
@@ -58,32 +62,27 @@
 	<button on:click={() => gotoPage(pages.length)}>
 		&gt;
 	</button>
+	{/await}
 </main>
 
 <style>
 	main {
 		text-align: center;
-		padding: 1em;
 		max-width: 240px;
 		margin: 0 auto;
-	}
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
 	}
 	.gallery {
 		max-width: 100%;
 		margin: 0 auto;
 	}
-	.beer_gallery {
+	.btn_none {
 		width: calc(20% - 60px);
 		display: inline-grid;
 		padding: 10px;
 		margin: 20px;
+		background: transparent;
+		border: transparent;
 	}
-
 	@media (min-width: 640px) {
 		main {
 			max-width: none;

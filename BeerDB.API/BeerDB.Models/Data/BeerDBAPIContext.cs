@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BeerDB.API.Models
 {
-    public class BeerDBAPIContext : IdentityDbContext<IdentityUser>
+    public class BeerDBAPIContext : IdentityDbContext<BeerDbUser>
     {
         public BeerDBAPIContext (DbContextOptions<BeerDBAPIContext> options)
             : base(options)
@@ -17,5 +17,7 @@ namespace BeerDB.API.Models
         }
 
         public DbSet<Reactie> Reactie { get; set; }
+        public DbSet<BeerDbUser> BeerDbUser { get; set; }
+
     }
 }

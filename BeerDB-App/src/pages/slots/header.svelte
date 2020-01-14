@@ -1,12 +1,18 @@
+<script>
+
+</script>
+
 <slot>
     <div id="header">
-        <div class="logo">
+        <a href="/"><div class="logo">
             <p>logo</p>
-        </div>
+        </div></a>
         <div class="menu">
             <ul class="menu__list">
-                <li class="menu__list-item"><a href="/beers">Bieren</a></li>
-                <li class="menu__list-item"><a href="/breweries">Brouwerijen</a></li>
+                <li class="menu__list-item"><a href="/beers">Beers</a></li>
+                <li class="menu__list-item"><a href="/breweries">Breweries</a></li>
+                <li class="menu__list-item"><a href="/login">Login</a></li>
+                <li class="menu__list-item"><a href="/register">Register</a></li>
             </ul>
         </div>
     </div>

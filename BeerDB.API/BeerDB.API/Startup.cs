@@ -96,7 +96,7 @@ namespace BeerDB.API
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
-            //seedIdentity.SeedIdentityMobileAppsAPI().Wait();
+            seedIdentity.SeedIdentityMobileAppsAPI().Wait();
         }
     }
 }
