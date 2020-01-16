@@ -56,18 +56,7 @@ namespace BeerDB.API.Controllers
                 identityModel.Password, false, false);
                 if (result.Succeeded)
                 {
-                    var claims = new List<Claim>{
-                        new Claim(ClaimTypes.Name, Guid.NewGuid().ToString())
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties();
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity), authProperties);
-
-                    return Ok(identityModel.UserName);
+                    return Ok("welcome: " + identityModel.UserName);
                 }
                 ModelState.AddModelError("", "Username or password not found");
                 return BadRequest("Failed to login");

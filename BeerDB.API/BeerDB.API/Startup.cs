@@ -47,17 +47,33 @@ namespace BeerDB.API
 
             services.AddCors();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-              .AddCookie(options =>
-              {
-                  options.Cookie.HttpOnly = true;
-                  options.Cookie.SecurePolicy = _environment.IsDevelopment()
-                    ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
-                  options.Cookie.SameSite = SameSiteMode.Lax;
-                  options.Cookie.Name = "AuthCookie";
-                  options.LoginPath = "/Login";
-                  options.LogoutPath = "/Logout";
-              });
+            services.AddAuthentication("HowestScheme")
+             .AddCookie("HowestScheme", options =>
+             {
+                 options.Events =
+                 new CookieAuthenticationEvents()
+                 {
+                     OnRedirectToLogin = (ctx) =>
+                     {
+                         if (ctx.Request.Path.StartsWithSegments("/api") &&
+                     ctx.Response.StatusCode == 200) //redirect is 200
+                     {
+                         //doe geen redirect naar een loginpagina bij een api call
+                         //maar geef een 401 - unauthorized
+                         ctx.Response.StatusCode = 401;
+                     }
+                         return Task.CompletedTask;
+                     },
+                     OnRedirectToAccessDenied = (ctx) =>
+                     {
+                         if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                         {
+                             ctx.Response.StatusCode = 403; //uitvoering refused
+                         }
+                         return Task.CompletedTask;
+                     }
+                 };
+             });
 
             services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
 
