@@ -1,14 +1,14 @@
 <script>
-    import Header from './slots/header.svelte';
-    import Loader from './slots/loader.svelte';
-    import { id } from '../store.js';
+    import Header from '../slots/header.svelte';
+    import Loader from '../slots/loader.svelte';
+    import { params } from '@sveltech/routify';
 
     let brewery = [];
     
     let promise = getBreweryInfo();
 
 	async function getBreweryInfo(){
-		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/brewery/${$id}?&key=395c2bade2ee114e421a9228d3cbc512`);
+		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/brewery/${$params.breweryId}?&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
 		brewery = json.data;
         console.log(brewery);

@@ -17,14 +17,18 @@ using BeerDB.Models;
 using Microsoft.AspNetCore.Identity;
 using BeerDB.Models.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace BeerDB.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment _environment;
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
+            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
@@ -43,34 +47,23 @@ namespace BeerDB.API
 
             services.AddCors();
 
-            services.AddAuthentication("HowestScheme")
-             .AddCookie("HowestScheme", options =>
-             {
-                 options.Events =
-                 new CookieAuthenticationEvents()
-                 {
-                     OnRedirectToLogin = (ctx) =>
-                     {
-                         if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200) //redirect is 200
-                         {
-                             //doe geen redirect naar een loginpagina bij een api call
-                             //maar geef een 401 - unauthorized
-                             ctx.Response.StatusCode = 401;
-                         }
-                         return Task.CompletedTask;
-                     },
-                     OnRedirectToAccessDenied = (ctx) =>
-                     {
-                         if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                         {
-                             ctx.Response.StatusCode = 403; //uitvoering refused
-                         }
-                         return Task.CompletedTask;
-                     }
-                 };
-             });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+              .AddCookie(options =>
+              {
+                  options.Cookie.HttpOnly = true;
+                  options.Cookie.SecurePolicy = _environment.IsDevelopment()
+                    ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
+                  options.Cookie.SameSite = SameSiteMode.Lax;
+                  options.Cookie.Name = "AuthCookie";
+                  options.LoginPath = "/Login";
+                  options.LogoutPath = "/Logout";
+              });
 
-            services.AddScoped<IReactieRepo, ReactieRepo>();
+            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
+
+
+            services.AddScoped<ICommentRepo, CommentRepo>();
+            services.AddScoped<IAuthenticatieRepo, AuthenticatieRepo>();
 
             services.AddTransient<SeedIdentity>();
         }
@@ -93,6 +86,7 @@ namespace BeerDB.API
                 .AllowAnyMethod()
                 .AllowAnyOrigin();
             });
+            app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();

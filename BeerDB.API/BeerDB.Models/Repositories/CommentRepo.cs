@@ -3,25 +3,26 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BeerDB.Models.Repositories
 {
-    public class ReactieRepo : IReactieRepo
+    public class CommentRepo : ICommentRepo
     {
         private BeerDBAPIContext _context;
-        public ReactieRepo(BeerDBAPIContext context)
+
+        public CommentRepo(BeerDBAPIContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Reactie>> GetAllAsync()
+        public async Task<IEnumerable<Comment>> GetAllAsync()
         {
             return await _context.Reactie.OrderBy(r => r.Id).AsNoTracking().ToListAsync();
         }
 
-        public async Task AddReactieAsync(Reactie reactie)
+
+        public async Task AddAsync(Comment reactie)
         {
             await _context.Reactie.AddAsync(reactie);
             try
@@ -31,26 +32,21 @@ namespace BeerDB.Models.Repositories
             catch (Exception ex)
             {
 
-                throw new Exception($"creating the reaction did not succeed");
+                throw new Exception($"creating the reaction did not succeed, {ex}");
             }
         }
 
-        public async Task<IEnumerable<BeerDbUser>> GetAllGebruikers()
+        public async Task uvghv(Comment reactie)
         {
-            return await _context.BeerDbUser.OrderBy(q => q.Id).AsNoTracking().ToListAsync();
-        }
-
-        public async Task AddGebruiker(BeerDbUser beerDbUser)
-        {
-            await _context.BeerDbUser.AddAsync(beerDbUser);
+            await _context.Reactie.AddAsync(reactie);
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw new Exception($"creating the user {beerDbUser.UserName} did not succeed");
+                throw new Exception($"creating the reaction did not succeed, {ex}");
             }
         }
     }

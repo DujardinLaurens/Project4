@@ -1,5 +1,24 @@
 <script>
     import Header from './slots/header.svelte'
+    import axios from 'axios'
+
+    let username = "";
+    let password = "";
+
+    function register() {
+      axios({
+        method: 'post',
+        url: "http://localhost:50698/api/auth/register",
+        data: {
+          username: username,
+          password: password
+        }
+      })
+      .then(function(response){
+          console.log(response)
+      })
+      .catch(err => console.log(err.response))
+    }
 
     function checkIfPswCorrect(form){
         password1 = form.psw.value; 
@@ -12,26 +31,34 @@
             return true;
         }
     }
+
+    // let pswInput =  document.getElementById('psw');
+    // pswInput.onkeyup = function() {
+    //     var lowerCaseLetters = /[a-z]/g;
+    //     var upperCaseLetters = /[A-Z]/g;
+    //     var numbers = /[0-9]/g;
+    // }
 </script>
 
 <main>
     <Header></Header>
     <h2>Register</h2>
 
-    <form action="/" method="post" onSubmit = "return checkIfPswCorrect(this)">
+    <form on:submit|preventDefault={register}>
 
         <div class="container">
             <label for="uname"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="uname" required>
+            <input bind:value={username} type="text" placeholder="Enter Username" name="uname" required>
 
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" required>
+            <label for="psw"><b>Password (must have symbol(s) & number(s))</b></label>
+            <input bind:value={password} type="password" placeholder="Enter Password" name="psw" required>
 
             <label for="psw"><b>Confirm password</b></label>
-            <input type="password" placeholder="Confirm Password" name="confirm_psw" required>
+            <input id="psw" type="password" placeholder="Confirm Password" name="confirm_psw" required>
             
             <label>
             <button type="submit">Register</button>
+            <p id="demo"></p>
         </div>
     </form>
 </main>

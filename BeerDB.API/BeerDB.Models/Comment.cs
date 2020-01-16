@@ -4,17 +4,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BeerDB.Models
 {
-    public class Reactie
+    public class Comment
     {
         [Key]
         public int Id { get; set; }
+        public string user { get; set; }
         [Required]
-        public string gebruiker { get; set; }
+        public string beerId { get; set; }
         [Required]
-        public string bierId { get; set; }
-        [Required]
-        [StringLength(1000, ErrorMessage = "Commentaar mag mixamaal 1000 karakters bevatten")]
-        public string commentaar { get; set; }
+        [StringLength(1000, ErrorMessage = "Comment can only be 1000 characters long")]
+        public string comment { get; set; }
         //public byte[] foto { get; set; }
         [Required]
         public DateTime timePosted { get; set; }

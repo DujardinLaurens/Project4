@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BeerDB.API.Models;
-using BeerDB.API.Services;
 using BeerDB.Models;
 using BeerDB.Models.Repositories;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -19,18 +21,20 @@ namespace BeerDB.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly BeerDBAPIContext _context;
-        private readonly IReactieRepo _reactieRepo;
+        private readonly IAuthenticatieRepo _authenticatieRepo;
         private readonly SignInManager<BeerDbUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<AuthController> _logger;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly UserManager<BeerDbUser> _userManager;
         private IPasswordHasher<BeerDbUser> _hasher;
 
-        public AuthController(BeerDBAPIContext context, IReactieRepo reactieRepo, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, Microsoft.Extensions.Configuration.IConfiguration configuration, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher)
+        public AuthController(BeerDBAPIContext context, IAuthenticatieRepo authenticatieRepo, RoleManager<IdentityRole> roleManager, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, Microsoft.Extensions.Configuration.IConfiguration configuration, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher)
         {
             _context = context;
-            _reactieRepo = reactieRepo;
+            _authenticatieRepo = authenticatieRepo;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _logger = logger;
             _configuration = configuration;
             _userManager = userManager;
@@ -52,7 +56,18 @@ namespace BeerDB.API.Controllers
                 identityModel.Password, false, false);
                 if (result.Succeeded)
                 {
-                    return Ok("Welcome " + identityModel.UserName);
+                    var claims = new List<Claim>{
+                        new Claim(ClaimTypes.Name, Guid.NewGuid().ToString())
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties();
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity), authProperties);
+
+                    return Ok(identityModel.UserName);
                 }
                 ModelState.AddModelError("", "Username or password not found");
                 return BadRequest("Failed to login");
@@ -60,39 +75,77 @@ namespace BeerDB.API.Controllers
             }
             catch (Exception exc)
             {
-                _logger.LogError($"Exception thrown when logging in: {exc}");
+                _logger.LogError("exception thrown when logging in: " + exc);
             }
             return BadRequest("Failed to login"); //zo weinig mogelijk (hacker) info
         }
 
         // GET: api/Auth/gebruikers
         [HttpGet("gebruikers")]
-        public async Task<IEnumerable<BeerDbUser>> GetGebruikers()
+        public async Task<IEnumerable<BeerDbUser>> GetUsers()
         {
-            return await _reactieRepo.GetAllGebruikers();
+            return await _authenticatieRepo.GetAllUser();
         }
 
         // POST: api/Auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> PostGebruiker([FromBody] BeerDbUser beerDbUser)
+        public async Task<IActionResult> PostUser([FromBody] BeerDbUser beerDbUser)
         {
             if (!ModelState.IsValid)
                 return BadRequest("unvalid data");
             try
             {
-                if (_userManager.FindByNameAsync(beerDbUser.UserName)
-                {
-                    this._logger.LogError($"Username already exists");
-                }
-                await _reactieRepo.AddGebruiker(beerDbUser);
+                var user = await _userManager.FindByNameAsync(beerDbUser.UserName);
 
-                return CreatedAtAction("GetGebruikers", new { id = beerDbUser.Id }, beerDbUser);
+                // Add User
+                if (user == null)
+                {
+                    if (!(await _roleManager.RoleExistsAsync("Admin")))
+                    {
+                        var role = new IdentityRole("Admin");
+                        await _roleManager.CreateAsync(role);
+                    }
+
+                    user = new BeerDbUser()
+                    {
+                        UserName = beerDbUser.UserName,
+                        SecurityStamp = Guid.NewGuid().ToString()
+
+                    };
+
+                    var userResult = await _userManager.CreateAsync(user, beerDbUser.Password);
+                    var roleResult = await _userManager.AddToRoleAsync(user, "Admin");
+
+                    if (!userResult.Succeeded || !roleResult.Succeeded)
+                    {
+                        //throw new InvalidOperationException("Username already taken");
+                    }
+                    return CreatedAtAction("GetUsers", beerDbUser);
+                }
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Dit werkt niet");
+                //this._logger.LogError($"Exception thrown when trying to register in: {exc}");
+            }
+            return BadRequest("Username already taken"); //zo weinig mogelijk (hacker) info 
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("unvalid data");
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return StatusCode(200, "logged out");
             }
             catch (Exception exc)
             {
                 this._logger.LogError($"Exception thrown when trying to register in: {exc}");
             }
-            return BadRequest("Failed to register"); //zo weinig mogelijk (hacker) info 
+            return BadRequest("Logout didn't work"); //zo weinig mogelijk (hacker) info 
         }
     }
 }

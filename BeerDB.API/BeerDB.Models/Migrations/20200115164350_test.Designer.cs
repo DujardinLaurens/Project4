@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BeerDB.Models.Migrations
 {
     [DbContext(typeof(BeerDBAPIContext))]
-    [Migration("20200112103811_init")]
-    partial class init
+    [Migration("20200115164350_test")]
+    partial class test
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -50,6 +50,8 @@ namespace BeerDB.Models.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
 
+                    b.Property<string>("Password");
+
                     b.Property<string>("PasswordHash");
 
                     b.Property<string>("PhoneNumber");
@@ -76,23 +78,24 @@ namespace BeerDB.Models.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("BeerDB.Models.Reactie", b =>
+            modelBuilder.Entity("BeerDB.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Identity_UserID");
+                    b.Property<string>("beerId")
+                        .IsRequired();
 
-                    b.Property<string>("bierId");
-
-                    b.Property<string>("commentaar");
+                    b.Property<string>("comment")
+                        .IsRequired()
+                        .HasMaxLength(1000);
 
                     b.Property<DateTime>("timePosted");
 
-                    b.HasKey("Id");
+                    b.Property<string>("user");
 
-                    b.HasIndex("Identity_UserID");
+                    b.HasKey("Id");
 
                     b.ToTable("Reactie");
                 });
@@ -205,13 +208,6 @@ namespace BeerDB.Models.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("BeerDB.Models.Reactie", b =>
-                {
-                    b.HasOne("BeerDB.Models.BeerDbUser", "Identity_user")
-                        .WithMany()
-                        .HasForeignKey("Identity_UserID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

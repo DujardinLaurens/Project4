@@ -48,6 +48,8 @@ namespace BeerDB.Models.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
 
+                    b.Property<string>("Password");
+
                     b.Property<string>("PasswordHash");
 
                     b.Property<string>("PhoneNumber");
@@ -74,19 +76,22 @@ namespace BeerDB.Models.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("BeerDB.Models.Reactie", b =>
+            modelBuilder.Entity("BeerDB.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("bierId");
+                    b.Property<string>("beerId")
+                        .IsRequired();
 
-                    b.Property<string>("commentaar");
-
-                    b.Property<string>("gebruiker");
+                    b.Property<string>("comment")
+                        .IsRequired()
+                        .HasMaxLength(1000);
 
                     b.Property<DateTime>("timePosted");
+
+                    b.Property<string>("user");
 
                     b.HasKey("Id");
 

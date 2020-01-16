@@ -1,7 +1,7 @@
 <script>
 	import Header from './slots/header.svelte';
 	import Loader from './slots/loader.svelte';
-	import { id } from '../store.js';
+	import { url } from '@sveltech/routify';
 
 	let beers = [];
 	
@@ -33,7 +33,7 @@
 	{:then}
 	<div id="myTable" class="gallery">
 		{#each beers as beer}
-		<a href="/beer_info"><button id="btn_none" class="btn_none" on:click={() => $id = beer.id}>
+		<a href={$url('/beer/:beerId', {beerId: `${beer.id}`})}><button id="btn_none" class="btn_none">
 		<div id="beer_gallery" class="beer_gallery">
 			{#if beer.labels == undefined}
 				<div class="beer_photo">

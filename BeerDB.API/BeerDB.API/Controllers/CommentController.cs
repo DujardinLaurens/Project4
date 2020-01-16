@@ -1,44 +1,45 @@
-﻿using System;
+﻿using BeerDB.API.Models;
+using BeerDB.Models;
+using BeerDB.Models.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BeerDB.API.Models;
-using BeerDB.Models;
-using BeerDB.Models.Repositories;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace BeerDB.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReactiesController : ControllerBase
+    public class CommentController : ControllerBase
     {
         private readonly BeerDBAPIContext _context;
-        private readonly IReactieRepo _reactieRepo;
-        private readonly ILogger<ReactiesController> _logger;
+        private readonly ICommentRepo _commentRepo;
+        private readonly ILogger<CommentController> _logger;
+        private readonly UserManager<BeerDbUser> _userManager;
 
-        public ReactiesController(BeerDBAPIContext context, IReactieRepo reactieRepo, ILogger<ReactiesController> logger)
+        public CommentController(BeerDBAPIContext context, ICommentRepo commentRepo, ILogger<CommentController> logger, UserManager<BeerDbUser> userManager)
         {
             _context = context;
-            _reactieRepo = reactieRepo;
+            _commentRepo = commentRepo;
             _logger = logger;
+            _userManager = userManager;
         }
 
         // GET: api/Reacties
         [HttpGet]
-        public async Task<IEnumerable<Reactie>> GetAllReacties()
+        public async Task<IEnumerable<Comment>> GetAllComments()
         {
-            return await _reactieRepo.GetAllAsync();
+            return await _commentRepo.GetAllAsync();
         }
 
         // GET: api/Reacties/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetReactie([FromRoute] int id)
+        public async Task<IActionResult> GetComment([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -57,7 +58,7 @@ namespace BeerDB.API.Controllers
 
         // PUT: api/Reacties/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReactie([FromRoute] int id, [FromBody] Reactie reactie)
+        public async Task<IActionResult> PutReactie([FromRoute] int id, [FromBody] Comment reactie)
         {
             if (!ModelState.IsValid)
             {
@@ -90,25 +91,24 @@ namespace BeerDB.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Reacties
+        // POST: api/Comment
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> PostReactie([FromBody] Reactie reactie)
+        [Authorize(AuthenticationSchemes = "Identity.Application")]
+        public async Task<IActionResult> PostComment([FromBody] Comment comment)
         {
             try
             {
-                reactie.timePosted = DateTime.UtcNow;
-                reactie.gebruiker = User.Identity.Name;
-                await _reactieRepo.AddReactieAsync(reactie);
+                comment.timePosted = DateTime.UtcNow;
+                await _commentRepo.AddAsync(comment);
 
-                return CreatedAtAction("GetAllReacties", new { id = reactie.Id }, reactie);
+                return CreatedAtAction("GetAllComments", comment);
             }
             catch (Exception ex)
             {
 
-                _logger.LogError($"Exception thrown when trying to create a new quiz: {ex}");
+                _logger.LogError($"Exception thrown when trying to create a new comment: {ex}");
             }
-            return BadRequest("Invalid data to create a new quiz");
+            return BadRequest("Invalid data to create a new Comment");
         }
 
         // DELETE: api/Reacties/5
