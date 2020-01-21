@@ -16,7 +16,7 @@
 </script>
 
 <main>
-	<Header></Header>
+	<Header headerMessage={"A list of all breweries"} logoImage="beer.png"></Header>
 	{#await promise}
 	<Loader></Loader>
 	{:then}
@@ -25,11 +25,11 @@
 		<a href={$url('/brewery/:breweryId', {breweryId: `${brewery.id}`})}><button class="btn_none">
 		<div class="brewery_gallery">
 			{#if brewery.images == undefined}
-				<div class="no_image">
+				<div class="brewery_image">
 					<img src="brewery.png" alt="image"/>
 				</div>
 			{:else}
-				<div class="brewery_photo">
+				<div class="brewery_image">
 					<img src="{brewery.images.squareMedium}" alt="image" />
 				</div>
 			{/if}
@@ -48,16 +48,12 @@
 		max-width: 240px;
 		margin: 0 auto;
 	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
 	.gallery {
 		max-width: 100%;
 		margin: 0 auto;
+	}
+	a {
+		text-decoration: none;
 	}
 	.btn_none {
 		width: calc(20% - 60px);
@@ -66,10 +62,16 @@
 		margin: 20px;
 		background: transparent;
 		border: transparent;
+		cursor: pointer;
+		opacity: 0.7;
 	}
-	.no_image img {
-		width: 256px;
-		height: 256px;
+
+	.btn_none:hover {
+		opacity: 1;
+	}
+	.brewery_image img {
+		width: 196px;
+		height: 196px;
 	}
 	@media (min-width: 640px) {
 		main {

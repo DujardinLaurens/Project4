@@ -18,13 +18,13 @@ namespace BeerDB.Models.Repositories
 
         public async Task<IEnumerable<Comment>> GetAllAsync()
         {
-            return await _context.Reactie.OrderBy(r => r.Id).AsNoTracking().ToListAsync();
+            return await _context.Comment.OrderBy(r => r.Id).AsNoTracking().ToListAsync();
         }
 
 
         public async Task AddAsync(Comment reactie)
         {
-            await _context.Reactie.AddAsync(reactie);
+            await _context.Comment.AddAsync(reactie);
             try
             {
                 await _context.SaveChangesAsync();
@@ -36,18 +36,9 @@ namespace BeerDB.Models.Repositories
             }
         }
 
-        public async Task uvghv(Comment reactie)
+        public async Task<IEnumerable<Comment>> GetBySelectedId(string selectId)
         {
-            await _context.Reactie.AddAsync(reactie);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception($"creating the reaction did not succeed, {ex}");
-            }
+            return await _context.Comment.Where(c => c.selectedId == selectId).AsNoTracking().ToListAsync();
         }
     }
 }

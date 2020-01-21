@@ -4,14 +4,16 @@ using BeerDB.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BeerDB.Models.Migrations
 {
     [DbContext(typeof(BeerDBAPIContext))]
-    partial class BeerDBAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20200118104733_migr")]
+    partial class migr
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

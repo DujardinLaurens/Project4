@@ -16,7 +16,7 @@ namespace BeerDB.API.Models
         {
         }
 
-        public DbSet<Comment> Reactie { get; set; }
+        public DbSet<Comment> Comment { get; set; }
         public DbSet<BeerDbUser> BeerDbUser { get; set; }
 
     }

@@ -3,19 +3,20 @@
     import Loader from '../slots/loader.svelte';
     import axios from 'axios';
     import { params } from '@sveltech/routify';
+    import { onMount } from 'svelte';
 
     let beer = [];
-    
     let promise = getBeerInfo();
+    let comment = "";
+    let image = "";
+    let commentedBeers = [];
+    let commentedPromise = getCommentedBeers();
 
 	async function getBeerInfo(){
 		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beer/${$params.beerId}?&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
 		beer = json.data;
-        console.log(beer);
     };
-
-    let comment = "";
 
     function getCookie(cname) {
         var name = cname + "=";
@@ -33,61 +34,91 @@
         return "";
     }
 
-    console.log(getCookie("username"));
-    console.log($params.beerId)
-
     function addComment() {
       axios({
         method: 'post',
         url: "http://localhost:50698/api/comment",
+        headers: {
+            Authorization : 'Bearer ' + getCookie('token')
+        },
         data: {
             user: getCookie("username"),
-            beerId: $params.beerId,
+            selectedId: $params.beerId,
+            image: image,
             comment: comment
         }
       })
-      .then(response => console.log(response))
-      .catch(err => console.log(err))
+      .then(function(response){
+          window.location.reload();
+      })
+      .catch(function(err) {
+        if(err.response.status === 401) {
+            axios({
+                method: 'post',
+                url: "http://localhost:50698/api/auth/logout",
+            })
+            .then(function(response){
+                var cookies = document.cookie.split(";");
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i];
+                    var eqPos = cookie.indexOf("=");
+                    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                }
+                window.location='../login'
+            })
+            .catch(err => console.log(err))
+        }
+      })
     }
 
-
+    async function getCommentedBeers(){
+		const res = await fetch(`http://localhost:50698/api/comment/${$params.beerId}`);
+		const json = await res.json();
+        commentedBeers.push(json);
+        console.log(commentedBeers[0]);
+    };
+    
+    onMount(function showCommentFunction(){
+        let cookie = getCookie('loggedIn');
+        if(cookie){
+            document.getElementById('comment_form').style.display = "";
+        }
+        else {
+            document.getElementById('comment_form').style.display = "none";
+        }
+    })
 </script>
 
 <main>
-    <Header></Header>
     {#await promise}
         <Loader></Loader>
     {:then}
+        <Header headerMessage="{beer.name}" logoImage="../beer.png"></Header>
         <div class="info">
-            <h1>{beer.name}</h1>
-
             {#if !beer.labels}
-                <div></div>
+                <p></p>
             {:else}
-                <div class="beer_photo">
-                    <img src="{beer.labels.medium}" alt="bier foto" />
-                </div>
+            <div class="img_div">
+                <img src="{beer.labels.medium}" alt="beer picture" />
+            </div>
             {/if}
-
-            {#if ! beer.abv}
+            {#if !beer.abv}
                 <p></p>
             {:else}
                 <p>ABV: {beer.abv}%</p>
             {/if}
-
-            {#if ! beer.isOrganic}
+            {#if !beer.isOrganic}
                 <p></p>
             {:else}
                 <p>Organic?: {beer.isOrganic}</p>
             {/if}
-
             {#if !beer.style}
                 <p></p>
             {:else}
                 <p>Category: {beer.style.category.name}</p>
                 <p>{beer.style.description}</p>
             {/if}
-
             {#if !beer.glass}
                 <p></p>
             {:else}
@@ -96,27 +127,30 @@
                     <img class="glass_img" src='../{beer.glass.name}.jpg' alt="beer glass type"/>
                 </div>
             {/if}
-
             {#if !beer.foodPairings}
                 <p></p>
             {:else}
-                <div>
-                    <p>Delicious with: {beer.foodPairings}</p>
-                </div>
+                <p>Delicious with: {beer.foodPairings}</p>
             {/if}
         </div>
-    {/await}
-
-    <form on:submit|preventDefault={addComment}>
-
-        <div class="container">
-            <label for="psw"><b>Comment</b></label>
-            <textarea bind:value={comment} type="comment" placeholder="place a comment..." name="comment" required></textarea>
-            
-            <label>
-            <button type="submit">Submit</button>
+        <form id="comment_form" on:submit|preventDefault={addComment}>
+            <div class="comment_container">
+                <label for="psw"><b>Comment</b></label>
+                <textarea bind:value={comment} type="comment" placeholder="place a comment..." name="comment" required></textarea>
+                <label>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        <div class="comments">
+            {#each commentedBeers[0] as comments}
+                <div class="comments__comment">
+                    <h3>{comments.user}</h3>
+                    <p>{comments.comment}</p>
+                    <p>{comments.timePosted}</p>
+                </div>
+            {/each}
         </div>
-    </form>
+    {/await}
 </main>
 
 <style>
@@ -132,5 +166,10 @@
     .glass_img {
         width: 100px;
         height: 100px;
+    }
+    
+    .img_div {
+        display: flex;
+        justify-content: center;
     }
 </style>

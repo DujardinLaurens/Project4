@@ -19,6 +19,10 @@ using BeerDB.Models.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BeerDB.API
 {
@@ -45,37 +49,33 @@ namespace BeerDB.API
                 .AddEntityFrameworkStores<BeerDBAPIContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddCors();
+            services.AddCors(cfg =>
+            {
+                cfg.AddPolicy("user", builder =>
+                {
+                    builder.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins("http://localhost:5000");
+                });
+            });
 
-            services.AddAuthentication("HowestScheme")
-             .AddCookie("HowestScheme", options =>
+                    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+             .AddJwtBearer(options =>
              {
-                 options.Events =
-                 new CookieAuthenticationEvents()
+                 options.TokenValidationParameters = new TokenValidationParameters()
                  {
-                     OnRedirectToLogin = (ctx) =>
-                     {
-                         if (ctx.Request.Path.StartsWithSegments("/api") &&
-                     ctx.Response.StatusCode == 200) //redirect is 200
-                     {
-                         //doe geen redirect naar een loginpagina bij een api call
-                         //maar geef een 401 - unauthorized
-                         ctx.Response.StatusCode = 401;
-                     }
-                         return Task.CompletedTask;
-                     },
-                     OnRedirectToAccessDenied = (ctx) =>
-                     {
-                         if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                         {
-                             ctx.Response.StatusCode = 403; //uitvoering refused
-                         }
-                         return Task.CompletedTask;
-                     }
-                 };
-             });
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidateLifetime = true,
+                     ValidateIssuerSigningKey = true,
+                     ValidIssuer = Configuration["Tokens:Issuer"],
+                     ValidAudience = Configuration["Tokens:Audience"],
 
-            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
+                 };
+                 options.SaveToken = false;
+                 options.RequireHttpsMetadata = false;
+             });
 
 
             services.AddScoped<ICommentRepo, CommentRepo>();
@@ -102,7 +102,6 @@ namespace BeerDB.API
                 .AllowAnyMethod()
                 .AllowAnyOrigin();
             });
-            app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();

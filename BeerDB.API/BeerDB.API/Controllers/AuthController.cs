@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BeerDB.API.Models;
+using BeerDB.API.Services;
 using BeerDB.Models;
 using BeerDB.Models.Repositories;
 using Microsoft.AspNetCore.Authentication;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace BeerDB.API.Controllers
@@ -23,22 +25,22 @@ namespace BeerDB.API.Controllers
         private readonly BeerDBAPIContext _context;
         private readonly IAuthenticatieRepo _authenticatieRepo;
         private readonly SignInManager<BeerDbUser> _signInManager;
+        private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<AuthController> _logger;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly UserManager<BeerDbUser> _userManager;
         private IPasswordHasher<BeerDbUser> _hasher;
 
-        public AuthController(BeerDBAPIContext context, IAuthenticatieRepo authenticatieRepo, RoleManager<IdentityRole> roleManager, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, Microsoft.Extensions.Configuration.IConfiguration configuration, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher)
+        public AuthController(BeerDBAPIContext context, IAuthenticatieRepo authenticatieRepo, RoleManager<IdentityRole> roleManager, SignInManager<BeerDbUser> signInManager, ILogger<AuthController> logger, UserManager<BeerDbUser> userManager, IPasswordHasher<BeerDbUser> hasher, IConfiguration configuration)
         {
             _context = context;
             _authenticatieRepo = authenticatieRepo;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _logger = logger;
-            _configuration = configuration;
             _userManager = userManager;
             _hasher = hasher;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -56,7 +58,7 @@ namespace BeerDB.API.Controllers
                 identityModel.Password, false, false);
                 if (result.Succeeded)
                 {
-                    return Ok("welcome: " + identityModel.UserName);
+                    return Ok(identityModel.UserName);
                 }
                 ModelState.AddModelError("", "Username or password not found");
                 return BadRequest("Failed to login");
@@ -78,6 +80,7 @@ namespace BeerDB.API.Controllers
 
         // POST: api/Auth/register
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> PostUser([FromBody] BeerDbUser beerDbUser)
         {
             if (!ModelState.IsValid)
@@ -107,20 +110,21 @@ namespace BeerDB.API.Controllers
 
                     if (!userResult.Succeeded || !roleResult.Succeeded)
                     {
-                        //throw new InvalidOperationException("Username already taken");
+                        throw new InvalidOperationException("Username already taken");
                     }
                     return CreatedAtAction("GetUsers", beerDbUser);
                 }
             }
             catch (Exception exc)
             {
-                throw new Exception("Dit werkt niet");
+                throw new InvalidOperationException("Password not strong enough");
                 //this._logger.LogError($"Exception thrown when trying to register in: {exc}");
             }
-            return BadRequest("Username already taken"); //zo weinig mogelijk (hacker) info 
+            throw new InvalidOperationException("Username already exists"); //zo weinig mogelijk (hacker) info 
         }
 
         [HttpPost("logout")]
+        [AllowAnonymous]
         public async Task<IActionResult> LogOut()
         {
             if (!ModelState.IsValid)
@@ -135,6 +139,24 @@ namespace BeerDB.API.Controllers
                 this._logger.LogError($"Exception thrown when trying to register in: {exc}");
             }
             return BadRequest("Logout didn't work"); //zo weinig mogelijk (hacker) info 
+        }
+
+        [HttpPost("token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GenerateJwtToken([FromBody]IdentityModel identityModel)
+        {
+            try
+            {
+                var jwtsvc = new JWTServices<BeerDbUser>(_configuration, _logger, _userManager, _hasher);
+                var token = await jwtsvc.GenerateJwtToken(identityModel);
+                return Ok(token);
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError($"Exception thrown when creating JWT: {exc}");
+            }
+            //Bij niet succesvolle authenticatie wordt een Badrequest (=zo weinig mogelijkeinfo) teruggeven.
+            return BadRequest("Failed to generate JWT token");
         }
     }
 }

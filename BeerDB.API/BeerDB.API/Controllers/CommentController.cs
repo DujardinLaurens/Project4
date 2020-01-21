@@ -1,13 +1,16 @@
 ﻿using BeerDB.API.Models;
 using BeerDB.Models;
 using BeerDB.Models.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,30 +33,18 @@ namespace BeerDB.API.Controllers
             _userManager = userManager;
         }
 
-        // GET: api/Reacties
+        // GET: api/comment
         [HttpGet]
         public async Task<IEnumerable<Comment>> GetAllComments()
         {
             return await _commentRepo.GetAllAsync();
         }
 
-        // GET: api/Reacties/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetComment([FromRoute] int id)
+        [HttpGet("{selectId}")]
+        [AllowAnonymous]
+        public async Task<IEnumerable<Comment>> GetCommentsForSelectedId(string selectId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var reactie = await _context.Reactie.FindAsync(id);
-
-            if (reactie == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(reactie);
+            return await _commentRepo.GetBySelectedId(selectId);
         }
 
         // PUT: api/Reacties/5
@@ -93,7 +84,8 @@ namespace BeerDB.API.Controllers
 
         // POST: api/Comment
         [HttpPost]
-        [Authorize(AuthenticationSchemes = "Identity.Application")]
+        [EnableCors("user")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> PostComment([FromBody] Comment comment)
         {
             try
@@ -120,13 +112,13 @@ namespace BeerDB.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var reactie = await _context.Reactie.FindAsync(id);
+            var reactie = await _context.Comment.FindAsync(id);
             if (reactie == null)
             {
                 return NotFound();
             }
 
-            _context.Reactie.Remove(reactie);
+            _context.Comment.Remove(reactie);
             await _context.SaveChangesAsync();
 
             return Ok(reactie);
@@ -134,7 +126,7 @@ namespace BeerDB.API.Controllers
 
         private bool ReactieExists(int id)
         {
-            return _context.Reactie.Any(e => e.Id == id);
+            return _context.Comment.Any(e => e.Id == id);
         }
     }
 }
