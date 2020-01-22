@@ -4,6 +4,9 @@
 	import { url } from '@sveltech/routify';
 
 	let beers = [];
+	let searchWord = "";
+	let searchedBeers = [];
+	let searched = true;
 	
 	const pages = [
 		...new Array(24).fill().map((x, i) => i).slice(1)
@@ -21,27 +24,26 @@
 	async function getBeers(){
 		const res = await fetch(`https://sandbox-api.brewerydb.com/v2/beers?p=1&key=395c2bade2ee114e421a9228d3cbc512`);
 		const json = await res.json();
-		beers = json.data;	
+		beers = json.data;
 		console.log(beers)
 	};
 
-	function filterBeers() {
-	let input, filter, table, tr, td, i, txtValue;
-	input = document.getElementById("input");
-	filter = input.value.toUpperCase();
-	table = document.getElementById("gallery");
-	tr = table.getElementsByTagName("a");
-	for (i = 0; i < tr.length; i++) {
-		td = tr[i].getElementsByTagName("button")[0];
-		if (td) {
-		txtValue = td.textContent || td.innerText;
-		if (txtValue.toUpperCase().indexOf(filter) > -1) {
-			tr[i].style.display = "";
-		} else {
-			tr[i].style.display = "none";
+	async function searchBeers() {
+		if(searchWord != ""){
+			const res = await fetch(`https://sandbox-api.brewerydb.com/v2/search?q=${searchWord}&type=beer&key=395c2bade2ee114e421a9228d3cbc512`);
+			const json = await res.json();
+			searchedBeers = json.data;
+			console.log(searchedBeers)
+			document.getElementById('gallery').style.display = "none";
+			document.getElementById('gallery_searched').style.display = "";
+			if(searchedBeers == undefined){
+				searchedBeers = [];
+			}
 		}
-		}       
-	}
+		else {
+			document.getElementById('gallery_searched').style.display = "none";
+			document.getElementById('gallery').style.display = "";
+		}
 	}
 </script>
 
@@ -50,7 +52,7 @@
 	{#await promise}
 	<Loader></Loader>
 	{:then}
-	<input type="text" id="input" on:keyup={filterBeers} placeholder="Search for beers.." title="Type in a beer">
+	<input bind:value={searchWord} type="text" id="input" on:keyup={searchBeers} placeholder="Search for beers.." title="Type in a beer">
 	<div id="gallery" class="gallery">
 		{#each beers as beer}
 		<a id="listItem" href={$url('/beer/:beerId', {beerId: `${beer.id}`})}><button id="btn_none" class="btn_none">
@@ -61,7 +63,7 @@
 				</div>
 			{:else}
 				<div class="beer_image">
-					<img src="{beer.labels.medium}" alt="image" />
+					<img src="{beer.labels.large}" alt="image" />
 				</div>
 			{/if}
 			<div id="name" class="beer_name">
@@ -70,18 +72,32 @@
 		</div></button></a>
 		{/each}
 	</div>
+	<div id="gallery_searched" class="gallery_searched">
+		{#each searchedBeers as searchBeer}
+		<a id="listItem" href={$url('/beer/:beerId', {beerId: `${searchBeer.id}`})}><button id="btn_none" class="btn_none">
+		<div id="beer_gallery" class="beer_gallery">
+			{#if searchBeer.labels == undefined}
+				<div class="beer_image">
+					<img src="beer.png" alt="image"/>
+				</div>
+			{:else}
+				<div class="beer_image">
+					<img src="{searchBeer.labels.large}" alt="image" />
+				</div>
+			{/if}
+			<div id="name" class="beer_name">
+				<p>{searchBeer.name}</p>
+			</div>
+		</div></button></a>
+		{/each}
+	</div>
 
-	<button on:click={() => gotoPage(0)}>
-		&lt;
-	</button>
 	{#each pages as page}
 		<button on:click={() => gotoPage(page)}>
 			{page}
 		</button>
 	{/each}
-	<button on:click={() => gotoPage(pages.length)}>
-		&gt;
-	</button>
+
 	{/await}
 </main>
 
